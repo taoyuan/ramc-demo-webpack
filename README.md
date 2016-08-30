@@ -4,16 +4,16 @@
 
 ## Run
 
-* Install modules
+### 1. Install modules
 ```
 npm install
 ```
 
-* Generate library
+### 2. Generate library
 ```
 npm run generate
 ```
-* Build with webpack
+### 3. Build with webpack
 ```
 npm run build
 ```
@@ -22,4 +22,4 @@ or
 npm run build:watch
 ```
 
-* Open index.html in browser directory
+### 4. Open `index.html` in browser directory
