@@ -64,6 +64,10 @@
         this.timeout = 60000;
       }
 
+      if (global.Promise) {
+        Requestor.Promise = global.Promise;
+      }
+
       Requestor.prototype.configure = function(options) {
         if (typeof options === 'string') {
           options = {
@@ -546,16 +550,33 @@
           request.accept(accept);
         }
 
-        request.end(function(error, res) {
-          if (!error) {
-            res.data = that.deserialize(res, returnType);
-          }
-          if (callback) {
-            callback(error, res);
-          }
-        });
+        function fetch(done) {
+          return request.end(function(err, res) {
+            if (!err) {
+              res.data = that.deserialize(res, returnType);
+            }
+            if (done) {
+              done(err, res);
+            }
+          });
+        }
 
-        return request;
+        if (Requestor.Promise) {
+          return new Requestor.Promise(function(resolve, reject) {
+            fetch(function(err, res) {
+              if (callback) {
+                callback(err, res);
+              }
+              if (err) {
+                reject(err);
+              } else {
+                resolve(res);
+              }
+            });
+          });
+        } else {
+          fetch(callback);
+        }
       };
 
       /**
@@ -578,6 +599,15 @@
         }
       }
     });
+
+    Object.defineProperty(exports, 'Promise', {
+      get: function() {
+        return Requestor.Promise;
+      },
+      set: function(value) {
+        Requestor.Promise = value;
+      }
+    })
 
     options && exports.configure(options);
 
