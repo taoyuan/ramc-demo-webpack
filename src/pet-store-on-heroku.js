@@ -16,8 +16,14 @@
   }
 }(this, function(superagent) {
 
-  function create(options) {
-    const exports = {};
+  function Client(options) {
+    if (!(this instanceof Client)) {
+      return new Client(options);
+    }
+
+    this.Client = Client;
+
+    const that = this;
 
     // Requestor definition
     const Requestor = (function(superagent) {
@@ -110,7 +116,7 @@
       Requestor.prototype.removeAuth = function(name) {
         name = name || 'default';
         delete this.authentications[name];
-      }
+      };
 
       /**
        * Returns a string representation for an actual parameter.
@@ -320,6 +326,7 @@
         authNames.forEach(function(authName) {
           var auth = that.authentications[authName];
           if (!auth) return;
+          var data = {};
           switch (auth.type) {
             case 'basic':
               if (auth.username || auth.password) {
@@ -328,7 +335,6 @@
               break;
             case 'apiKey':
               if (auth.apiKey) {
-                var data = {};
                 if (auth.apiKeyPrefix) {
                   data[auth.name] = auth.apiKeyPrefix + ' ' + auth.apiKey;
                 } else {
@@ -344,7 +350,6 @@
             case 'oauth2':
               if (auth.accessToken) {
                 if (auth.name) {
-                  var data = {};
                   data[auth.name] = auth.accessToken;
                   if (auth['in'] === 'query') {
                     request.query(data);
@@ -589,27 +594,27 @@
     })(superagent);
     const requestor = new Requestor();
 
-    exports.Requestor = Requestor;
-    exports.requestor = requestor;
+    this.Requestor = Requestor;
+    this.requestor = requestor;
 
     Object.keys(requestor).concat(Object.keys(Requestor.prototype)).forEach(function(name) {
       if (typeof requestor[name] === 'function') {
-        exports[name] = function() {
+        that[name] = function() {
           return requestor[name].apply(requestor, arguments);
         }
       }
     });
 
-    Object.defineProperty(exports, 'Promise', {
+    Object.defineProperty(that, 'Promise', {
       get: function() {
         return Requestor.Promise;
       },
       set: function(value) {
         Requestor.Promise = value;
       }
-    })
+    });
 
-    options && exports.configure(options);
+    options && that.configure(options);
 
     // Models definitions
     const models = {};
@@ -666,146 +671,132 @@
     })(Requestor, requestor);
 
     // Services definitions
-    const API = (function(Requestor, _requestor) {
+    const api = (function(requestor) {
       /**
-       * API service.
-       * @module api/API
+       * api service.
+       * @module api/api
        * @version 1.0.0
        */
 
       /**
-       * Constructs a new API.
-       * @alias module:api/API
-       * @class
-       * @param {module:Requestor} [requestor] Optional API client implementation to use,
-       * default to {@link module:Requestor#instance} if unspecified.
+       * api service.
+       * @alias module:api/api
        */
-      function API(requestor) {
-        if (!(this instanceof API)) {
-          return new API(requestor);
+      var api = {};
+
+      api.get = function(opts, cb) {
+        if (typeof opts === 'function') {
+          cb = opts;
+          opts = null;
+        }
+        opts = opts || {};
+
+        var pathParams = {};
+        var queryParams = {};
+        var headerParams = {};
+        var formParams = {};
+
+        queryParams['limit'] = opts['limit'];
+
+        var postBody = null;
+
+        var authNames = [];
+        var contentTypes = ['application/json', 'text/xml'];
+        var accepts = ['application/json', 'text/html'];
+        var returnType = Object;
+
+        return requestor.request(
+          '/', 'GET',
+          pathParams, queryParams, headerParams, formParams, postBody,
+          authNames, contentTypes, accepts, returnType, cb
+        );
+      };
+      api.post = function(pet, cb) {
+        // verify the required parameter 'pet' is set
+        if (pet == undefined || pet == null) {
+          throw new Error("Missing the required parameter 'pet' when calling post");
         }
 
-        this.requestor = requestor || _requestor;
+        var pathParams = {};
+        var queryParams = {};
+        var headerParams = {};
+        var formParams = {};
 
-        this.get = function(opts, cb) {
-          if (typeof opts === 'function') {
-            cb = opts;
-            opts = null;
-          }
-          opts = opts || {};
+        var postBody = null;
+        postBody = pet;
 
-          var pathParams = {};
-          var queryParams = {};
-          var headerParams = {};
-          var formParams = {};
+        var authNames = [];
+        var contentTypes = ['application/json', 'text/xml'];
+        var accepts = ['application/json', 'text/html'];
+        var returnType = Object;
 
-          queryParams['limit'] = opts['limit'];
+        return requestor.request(
+          '/', 'POST',
+          pathParams, queryParams, headerParams, formParams, postBody,
+          authNames, contentTypes, accepts, returnType, cb
+        );
+      };
+      api.put = function(pet, cb) {
+        // verify the required parameter 'pet' is set
+        if (pet == undefined || pet == null) {
+          throw new Error("Missing the required parameter 'pet' when calling put");
+        }
 
-          var postBody = null;
+        var pathParams = {};
+        var queryParams = {};
+        var headerParams = {};
+        var formParams = {};
 
-          var authNames = [];
-          var contentTypes = ['application/json', 'text/xml'];
-          var accepts = ['application/json', 'text/html'];
-          var returnType = Object;
+        var postBody = null;
+        postBody = pet;
 
-          return this.requestor.request(
-            '/', 'GET',
-            pathParams, queryParams, headerParams, formParams, postBody,
-            authNames, contentTypes, accepts, returnType, cb
-          );
-        };
-        this.post = function(pet, cb) {
-          // verify the required parameter 'pet' is set
-          if (pet == undefined || pet == null) {
-            throw new Error("Missing the required parameter 'pet' when calling post");
-          }
+        var authNames = [];
+        var contentTypes = ['application/json', 'text/xml'];
+        var accepts = ['application/json', 'text/html'];
+        var returnType = Object;
 
-          var pathParams = {};
-          var queryParams = {};
-          var headerParams = {};
-          var formParams = {};
+        return requestor.request(
+          '/', 'PUT',
+          pathParams, queryParams, headerParams, formParams, postBody,
+          authNames, contentTypes, accepts, returnType, cb
+        );
+      };
+      api.getByPetId = function(petId, cb) {
+        // verify the required parameter 'petId' is set
+        if (petId == undefined || petId == null) {
+          throw new Error("Missing the required parameter 'petId' when calling getByPetId");
+        }
 
-          var postBody = null;
-          postBody = pet;
+        var pathParams = {};
+        var queryParams = {};
+        var headerParams = {};
+        var formParams = {};
 
-          var authNames = [];
-          var contentTypes = ['application/json', 'text/xml'];
-          var accepts = ['application/json', 'text/html'];
-          var returnType = Object;
+        pathParams['petId'] = petId;
 
-          return this.requestor.request(
-            '/', 'POST',
-            pathParams, queryParams, headerParams, formParams, postBody,
-            authNames, contentTypes, accepts, returnType, cb
-          );
-        };
-        this.put = function(pet, cb) {
-          // verify the required parameter 'pet' is set
-          if (pet == undefined || pet == null) {
-            throw new Error("Missing the required parameter 'pet' when calling put");
-          }
+        var postBody = null;
 
-          var pathParams = {};
-          var queryParams = {};
-          var headerParams = {};
-          var formParams = {};
+        var authNames = [];
+        var contentTypes = ['application/json', 'text/xml'];
+        var accepts = ['application/json', 'text/html'];
+        var returnType = Object;
 
-          var postBody = null;
-          postBody = pet;
+        return requestor.request(
+          '/{petId}', 'GET',
+          pathParams, queryParams, headerParams, formParams, postBody,
+          authNames, contentTypes, accepts, returnType, cb
+        );
+      };
 
-          var authNames = [];
-          var contentTypes = ['application/json', 'text/xml'];
-          var accepts = ['application/json', 'text/html'];
-          var returnType = Object;
-
-          return this.requestor.request(
-            '/', 'PUT',
-            pathParams, queryParams, headerParams, formParams, postBody,
-            authNames, contentTypes, accepts, returnType, cb
-          );
-        };
-        this.getByPetId = function(petId, cb) {
-          // verify the required parameter 'petId' is set
-          if (petId == undefined || petId == null) {
-            throw new Error("Missing the required parameter 'petId' when calling getByPetId");
-          }
-
-          var pathParams = {};
-          var queryParams = {};
-          var headerParams = {};
-          var formParams = {};
-
-          pathParams['petId'] = petId;
-
-          var postBody = null;
-
-          var authNames = [];
-          var contentTypes = ['application/json', 'text/xml'];
-          var accepts = ['application/json', 'text/html'];
-          var returnType = Object;
-
-          return this.requestor.request(
-            '/{petId}', 'GET',
-            pathParams, queryParams, headerParams, formParams, postBody,
-            authNames, contentTypes, accepts, returnType, cb
-          );
-        };
-
-      }
-
-      return API;
-    })(Requestor, requestor);
+      return api;
+    })(requestor);
 
     // Export models
-    exports.models = models;
+    that.models = models;
 
     // Export services
-    exports.API = API;
-
-    exports.create = create;
-
-    return exports;
+    that.api = api;
   }
 
-  return create();
+  return new Client();
 }));
