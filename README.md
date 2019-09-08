@@ -1,5 +1,7 @@
 # ramc-demo-webpack
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/taoyuan/ramc-demo-webpack.svg)](https://greenkeeper.io/)
+
 > A webpack demo for [ramc](https://github.com/taoyuan/ramc)
 
 ## Run
