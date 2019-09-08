@@ -9,13 +9,13 @@
   },
   "devDependencies": {
     "babel-core": "^6.14.0",
-    "babel-loader": "^6.2.5",
+    "babel-loader": "^8.0.6",
     "babel-preset-es2015": "^6.14.0",
-    "node-libs-browser": "^1.0.0",
-    "ramc": "^0.1.9",
-    "webpack": "^1.13.2"
+    "node-libs-browser": "^2.2.1",
+    "ramc": "^0.2.1",
+    "webpack": "^4.39.3"
   },
   "dependencies": {
-    "superagent": "^2.2.0"
+    "superagent": "^5.1.0"
   }
 }
